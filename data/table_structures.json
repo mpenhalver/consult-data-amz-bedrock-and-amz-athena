@@ -1,0 +1,50 @@
+{
+    "tables": [
+      {
+        "name": "Schools",
+        "description": "tabelas das escolas",
+        "columns": [
+          {"name": "school_unit_id", "type": "BIGINT", "description": "id da escola ou instituição"},
+          {"name": "name", "type": "STRING", "description": "nome da escola"},
+          {"name": "razao_social", "type": "STRING", "description": "razão social da escola"},
+          {"name": "cnpj", "type": "BIGINT", "description": "cnpj da escola"},
+          {"name": "cnpj_comprador", "type": "BIGINT", "description": "cnpj do comprador da escola"},
+          {"name": "codigo_mec", "type": "BIGINT", "description": "código do mec"},
+          {"name": "created_at", "type": "STRING", "description": "data de criação do registro da escola"},
+          {"name": "address_state", "type": "STRING", "description": "estado do país da escola"},
+          {"name": "address_city", "type": "STRING", "description": "endereço da escola"},
+          {"name": "address_cep", "type": "STRING", "description": "cep da escola"},
+          {"name": "flag_school_test", "type": "BIGINT", "description": ""},
+          {"name": "level_name", "type": "STRING", "description": "nível da escola"},
+          {"name": "network", "type": "STRING", "description": "rede da escola"},
+          {"name": "major_network", "type": "STRING", "description": ""},
+          {"name": "adoption_created_at", "type": "STRING", "description": "data de criação da adoção da escola"},
+          {"name": "grupo", "type": "STRING", "description": "nome do grupo da escola"},
+          {"name": "status_contrato", "type": "STRING", "description": "status atual do contrato"},
+          {"name": "flag_adoption_fake", "type": "BIGINT", "description": ""},
+          {"name": "idstatusadocao", "type": "BIGINT", "description": "identificação do status de adoção"},
+          {"name": "statusadocao", "type": "STRING", "description": "status de adoção"},
+          {"name": "anoletivo", "type": "BIGINT", "description": "ano letivo"},
+          {"name": "generated_at", "type": "STRING", "description": "gerado em"}
+        ]
+      },
+      {
+        "name": "Students",
+        "description": "tabela dos alunos",
+        "columns": [
+          {"name": "aluno_id", "type": "BIGINT", "description": "identificador único do aluno"},
+          {"name": "school_unit_id", "type": "BIGINT", "description": "id da escola ou instituição que o aluno está vinculado"},
+          {"name": "nome", "type": "STRING", "description": "primeiro nome do aluno"},
+          {"name": "sobrenome", "type": "STRING", "description": "sobrenome do aluno"},
+          {"name": "sexo", "type": "STRING", "description": "gênero do aluno"},
+          {"name": "data_nascimento", "type": "STRING", "description": "data de nascimento do aluno"},
+          {"name": "serie", "type": "STRING", "description": "série ou ano escolar do aluno"},
+          {"name": "turma", "type": "STRING", "description": "turma específica do aluno"},
+          {"name": "data_matricula", "type": "STRING", "description": "data em que o aluno foi matriculado"},
+          {"name": "responsavel", "type": "STRING", "description": "nome do responsável pelo aluno"},
+          {"name": "telefone_contato", "type": "BIGINT", "description": "número de telefone para contato"},
+          {"name": "email_contato", "type": "STRING", "description": "endereço de e-mail para contato"}
+        ]
+      }
+    ]
+  }

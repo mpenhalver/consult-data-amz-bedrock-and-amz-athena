@@ -1,0 +1,424 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ECS cluster com ALB para aplicacao PoC'
+
+# Input parameters for VPC CIDR blocks and ECR repository configuration
+Parameters:
+  VpcCIDR:
+    Type: String
+    Default: 10.0.0.0/16
+  PublicSubnet1CIDR:
+    Type: String
+    Default: 10.0.1.0/24
+  PublicSubnet2CIDR:
+    Type: String
+    Default: 10.0.2.0/24
+  PrivateSubnet1CIDR:
+    Type: String
+    Default: 10.0.3.0/24
+  PrivateSubnet2CIDR:
+    Type: String
+    Default: 10.0.4.0/24
+  ECRRepositoryName:
+    Type: String
+    Default: poc-app
+    Description: Nome do repositório ECR para a imagem Docker
+
+Resources:
+  # Create VPC with DNS support
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: PocAppVPC
+
+  # Setup Internet Gateway for public internet access
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # Create public subnets in different AZs for high availability
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+
+  # Create private subnets for ECS tasks
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PrivateSubnet1CIDR
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref PrivateSubnet2CIDR
+
+  # Create NAT Gateways and Elastic IPs
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+
+  NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId
+      SubnetId: !Ref PublicSubnet2
+
+  # Create private route tables
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  # Create routes for private subnets through NAT Gateways
+  PrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+
+  PrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
+
+  # Associate private subnets with private route tables
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable2
+  
+  # Configure routing for public subnets
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  # Associate public subnets with the public route table
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  # S3 Buckets
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: poc-table-data
+      VersioningConfiguration:
+        Status: Enabled
+
+  ConfigDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: poc-config-data
+      VersioningConfiguration:
+        Status: Enabled
+
+  # Glue Database
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: poc-db
+
+  # Athena Workgroup
+  AthenaWorkgroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: poc-workgroup
+      RecursiveDeleteOption: true
+      State: ENABLED
+      WorkGroupConfiguration:
+        ResultConfiguration:
+          OutputLocation: !Sub s3://${ConfigDataBucket}/athena-results/
+
+  # Create ECS cluster to manage containers
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: PocAppCluster
+
+  # Define ECS task definition with container configuration
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: poc-app-task
+      Cpu: '256'
+      Memory: '512'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !Ref ECSTaskExecutionRole
+      TaskRoleArn: !Ref ECSTaskRole
+      ContainerDefinitions:
+        - Name: poc-app
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepositoryName}:latest
+          PortMappings:
+            - ContainerPort: 7860
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          Environment:
+            - Name: POC_SERVER_NAME
+              Value: 0.0.0.0
+
+  # Create ECS service to manage task deployment
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: ALBListener
+    Properties:
+      ServiceName: PocAppService
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref ECSTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets:
+            - !Ref PrivateSubnet1
+            - !Ref PrivateSubnet2
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+      LoadBalancers:
+        - ContainerName: poc-app
+          ContainerPort: 7860
+          TargetGroupArn: !Ref ALBTargetGroup
+
+  # Create Application Load Balancer for traffic distribution
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      LoadBalancerAttributes:
+      - Key: idle_timeout.timeout_seconds
+        Value: '60'
+      Subnets:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroups: [!Ref ALBSecurityGroup]
+
+  # Configure ALB listener for HTTP traffic
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroup
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+
+  # Create target group for ALB routing
+  ALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckPath: /
+      Name: PocAppTargetGroup
+      Port: 7860
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref VPC
+
+  # Create IAM role for ECS task execution
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  # Create IAM role for ECS tasks with specific permissions
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: PocAppPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:*'
+                Resource:
+                  - !Sub arn:aws:s3:::${DataBucket}
+                  - !Sub arn:aws:s3:::${DataBucket}/*
+                  - !Sub arn:aws:s3:::${ConfigDataBucket}
+                  - !Sub arn:aws:s3:::${ConfigDataBucket}/*
+
+              - Effect: Allow
+                Action:
+                  - 'athena:*'
+                  - 'glue:GetTable'
+                  - 'glue:GetTables'
+                  - 'glue:GetDatabase'
+                  - 'glue:GetDatabases'
+                  - 'bedrock:InvokeModel'
+                Resource: '*'
+
+  # Define security group for ECS tasks
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Poc App ECS tasks
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 7860
+          ToPort: 7860
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+
+  # Define security group for ALB
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Poc App ALB
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  # Create CloudWatch log group for container logs
+  CloudWatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/poc-app
+      RetentionInDays: 14
+
+# Define stack outputs
+Outputs:
+  ALBDNSName:
+    Description: DNS name of the Application Load Balancer
+    Value: !GetAtt ALB.DNSName
+  ECRRepositoryUri:
+    Description: URI of the ECR Repository
+    Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepositoryName}
+  DataBucketName:
+    Description: Nome do bucket S3 para dados CSV
+    Value: !Ref DataBucket
+  ConfigDataBucketName:
+    Description: Nome do bucket S3 para dados de configuracao
+    Value: !Ref ConfigDataBucket
+  GlueDatabaseName:
+    Description: Nome do banco de dados Glues
+    Value: !Ref GlueDatabase
+  AthenaWorkgroupName:
+    Description: Nome do workgroup do Athena
+    Value: !Ref AthenaWorkgroup
+
+
+### 1. Salve-o como um arquivo YAML (por exemplo, `poc-app-stack.yaml`).
+
+### 2. Construa e envie sua imagem Docker para o ECR:
+
+  #  ```bash
+  #  aws ecr create-repository --repository-name poc-app
+  #  aws ecr get-login-password --region <sua-região> | docker login --username AWS --password-stdin <seu-account-id>.dkr.ecr.<sua-região>.amazonaws.com
+  #  docker build -t poc-app .
+  #  docker tag poc-app:latest <seu-account-id>.dkr.ecr.<sua-região>.amazonaws.com/poc-app:latest
+  #  docker push <seu-account-id>.dkr.ecr.<sua-região>.amazonaws.com/poc-app:latest
+  #  ```
+
+### 3. Implante o stack usando o AWS CLI:
+
+#    ```bash
+#    aws cloudformation create-stack --stack-name poc-app-stack --template-body file://poc-app-stack.yaml --capabilities CAPABILITY_IAM
+#    ```
+
+# 4. Após a implantação bem-sucedida, você pode acessar sua aplicação Poc usando o DNS do ALB fornecido na saída do stack.
+
+# 5. Subir as tabelas e o arquivo table structure no S3
+
+# 6. Criar o crawler e rodar
+
+
+

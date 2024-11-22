@@ -1,0 +1,101 @@
+aluno_id,school_unit_id,nome,sobrenome,sexo,data_nascimento,serie,turma,data_matricula,responsavel,telefone_contato,email_contato
+1,1,João,Silva,M,2010-05-15,5º ano,Turma A,2023-01-10,Maria Silva,11987654321,maria.silva@email.com
+2,1,Ana,Santos,F,2011-08-22,4º ano,Turma B,2023-01-12,Pedro Santos,11976543210,pedro.santos@email.com
+3,2,Carlos,Ferreira,M,2009-03-30,1º ano EM,Turma C,2023-01-15,Sandra Ferreira,21998765432,sandra.ferreira@email.com
+4,2,Beatriz,Oliveira,F,2008-11-07,2º ano EM,Turma D,2023-01-18,Roberto Oliveira,21987654321,roberto.oliveira@email.com
+5,3,Marcelo,Costa,M,2012-02-14,3º ano,Turma E,2023-01-20,Juliana Costa,31976543210,juliana.costa@email.com
+6,3,Fernanda,Rodrigues,F,2010-09-25,5º ano,Turma F,2023-01-22,André Rodrigues,31965432109,andre.rodrigues@email.com
+7,4,Lucas,Almeida,M,2017-06-03,Pré-escola,Turma G,2023-01-25,Camila Almeida,51954321098,camila.almeida@email.com
+8,4,Mariana,Souza,F,2018-01-19,Maternal,Turma H,2023-01-28,Felipe Souza,51943210987,felipe.souza@email.com
+9,5,Gabriel,Pereira,M,2007-12-11,3º ano EM,Turma I,2023-02-01,Patricia Pereira,41932109876,patricia.pereira@email.com
+10,5,Isabela,Gomes,F,2006-07-28,Técnico,Turma J,2023-02-03,Ricardo Gomes,41921098765,ricardo.gomes@email.com
+11,6,Thiago,Martins,M,2011-04-09,4º ano,Turma K,2023-02-05,Vanessa Martins,71910987654,vanessa.martins@email.com
+12,7,Laura,Cardoso,F,2008-10-17,2º ano EM,Turma L,2023-02-08,Gustavo Cardoso,85909876543,gustavo.cardoso@email.com
+13,8,Rafael,Barbosa,M,2009-08-05,1º ano EM,Turma M,2023-02-10,Monica Barbosa,81898765432,monica.barbosa@email.com
+14,9,Sofia,Ribeiro,F,2016-03-22,1º ano,Turma N,2023-02-12,Eduardo Ribeiro,62887654321,eduardo.ribeiro@email.com
+15,10,Enzo,Carvalho,M,2005-12-30,Técnico,Turma O,2023-02-15,Daniela Carvalho,48876543210,daniela.carvalho@email.com
+16,11,Valentina,Fernandes,F,2013-09-14,2º ano,Turma P,2023-02-18,Rogério Fernandes,92865432109,rogerio.fernandes@email.com
+17,12,Matheus,Correia,M,2007-06-26,3º ano EM,Turma Q,2023-02-20,Luciana Correia,91854321098,luciana.correia@email.com
+18,13,Julia,Teixeira,F,2010-01-08,5º ano,Turma R,2023-02-22,Marcio Teixeira,65843210987,marcio.teixeira@email.com
+19,14,Davi,Azevedo,M,2015-11-03,2º ano,Turma S,2023-02-25,Adriana Azevedo,67832109876,adriana.azevedo@email.com
+20,15,Sophia,Cavalcanti,F,2006-04-20,Técnico,Turma T,2023-02-28,Fernando Cavalcanti,27821098765,fernando.cavalcanti@email.com
+21,16,Miguel,Nunes,M,2014-07-12,3º ano,Turma U,2023-03-02,Cristina Nunes,11976543219,cristina.nunes@email.com
+22,17,Helena,Mendes,F,2013-02-28,4º ano,Turma V,2023-03-05,Ricardo Mendes,21965432108,ricardo.mendes@email.com
+23,18,Arthur,Pinto,M,2012-09-17,5º ano,Turma W,2023-03-08,Juliana Pinto,31954321097,juliana.pinto@email.com
+24,19,Alice,Fonseca,F,2011-11-05,6º ano,Turma X,2023-03-10,Marcelo Fonseca,41943210986,marcelo.fonseca@email.com
+25,20,Bernardo,Lima,M,2010-06-20,7º ano,Turma Y,2023-03-12,Adriana Lima,51932109875,adriana.lima@email.com
+26,21,Heloísa,Barros,F,2009-03-14,8º ano,Turma Z,2023-03-15,Carlos Barros,61921098764,carlos.barros@email.com
+27,22,Samuel,Moreira,M,2008-12-30,9º ano,Turma A,2023-03-18,Patricia Moreira,71910987653,patricia.moreira@email.com
+28,23,Valentina,Castro,F,2007-08-09,1º ano EM,Turma B,2023-03-20,Fernando Castro,81909876542,fernando.castro@email.com
+29,24,Théo,Monteiro,M,2006-05-22,2º ano EM,Turma C,2023-03-22,Beatriz Monteiro,91898765431,beatriz.monteiro@email.com
+30,25,Laura,Rocha,F,2005-10-11,3º ano EM,Turma D,2023-03-25,Gustavo Rocha,11887654320,gustavo.rocha@email.com
+31,26,Davi,Nascimento,M,2015-04-03,2º ano,Turma E,2023-03-28,Carla Nascimento,21876543219,carla.nascimento@email.com
+32,27,Cecília,Alves,F,2016-01-19,1º ano,Turma F,2023-03-30,Roberto Alves,31865432108,roberto.alves@email.com
+33,28,Lorenzo,Pereira,M,2017-09-07,Pré-escola,Turma G,2023-04-02,Monica Pereira,41854321097,monica.pereira@email.com
+34,29,Liz,Fernandes,F,2018-03-25,Maternal,Turma H,2023-04-05,Diego Fernandes,51843210986,diego.fernandes@email.com
+35,30,Benício,Ribeiro,M,2014-11-14,3º ano,Turma I,2023-04-08,Vanessa Ribeiro,61832109875,vanessa.ribeiro@email.com
+36,1,Maria Alice,Cardoso,F,2013-06-30,4º ano,Turma J,2023-04-10,Eduardo Cardoso,71821098764,eduardo.cardoso@email.com
+37,2,Joaquim,Correia,M,2012-02-16,5º ano,Turma K,2023-04-12,Larissa Correia,81810987653,larissa.correia@email.com
+38,3,Esther,Teixeira,F,2011-08-03,6º ano,Turma L,2023-04-15,Rodrigo Teixeira,91809876542,rodrigo.teixeira@email.com
+39,4,Guilherme,Azevedo,M,2010-04-21,7º ano,Turma M,2023-04-18,Amanda Azevedo,11798765431,amanda.azevedo@email.com
+40,5,Lara,Cavalcanti,F,2009-12-08,8º ano,Turma N,2023-04-20,Thiago Cavalcanti,21787654320,thiago.cavalcanti@email.com
+41,6,Isaac,Rodrigues,M,2008-07-27,9º ano,Turma O,2023-04-22,Camila Rodrigues,31776543219,camila.rodrigues@email.com
+42,7,Sarah,Ferreira,F,2007-03-15,1º ano EM,Turma P,2023-04-25,Lucas Ferreira,41765432108,lucas.ferreira@email.com
+43,8,Henrique,Oliveira,M,2006-10-02,2º ano EM,Turma Q,2023-04-28,Isabela Oliveira,51754321097,isabela.oliveira@email.com
+44,9,Elisa,Santos,F,2005-05-20,3º ano EM,Turma R,2023-05-01,André Santos,61743210986,andre.santos@email.com
+45,10,Pedro,Silva,M,2015-12-11,2º ano,Turma S,2023-05-03,Mariana Silva,71732109875,mariana.silva@email.com
+46,1,Maitê,Costa,F,2016-08-29,1º ano,Turma T,2023-05-05,Rafael Costa,81721098764,rafael.costa@email.com
+47,2,Antônio,Gomes,M,2017-04-17,Pré-escola,Turma U,2023-05-08,Julia Gomes,91710987653,julia.gomes@email.com
+48,3,Emanuelly,Martins,F,2018-01-05,Maternal,Turma V,2023-05-10,Felipe Martins,11709876542,felipe.martins@email.com
+49,4,Bryan,Barbosa,M,2014-09-23,3º ano,Turma W,2023-05-12,Letícia Barbosa,21698765431,leticia.barbosa@email.com
+50,5,Melissa,Soares,F,2013-05-10,4º ano,Turma X,2023-05-15,Renato Soares,31687654320,renato.soares@email.com
+51,6,Lucca,Vieira,M,2012-11-28,5º ano,Turma Y,2023-05-18,Fernanda Vieira,41676543219,fernanda.vieira@email.com
+52,7,Yasmin,Moraes,F,2011-07-15,6º ano,Turma Z,2023-05-20,Gustavo Moraes,51665432108,gustavo.moraes@email.com
+53,8,Nicolas,Peixoto,M,2010-03-02,7º ano,Turma A,2023-05-22,Carolina Peixoto,61654321097,carolina.peixoto@email.com
+54,9,Lívia,Fogaça,F,2009-09-19,8º ano,Turma B,2023-05-25,Marcelo Fogaça,71643210986,marcelo.fogaca@email.com
+55,10,João Miguel,Campos,M,2008-06-07,9º ano,Turma C,2023-05-28,Patrícia Campos,81632109875,patricia.campos@email.com
+56,11,Allana,Neves,F,2007-01-24,1º ano EM,Turma D,2023-05-30,Ricardo Neves,91621098764,ricardo.neves@email.com
+57,12,Caleb,Andrade,M,2006-08-12,2º ano EM,Turma E,2023-06-02,Daniela Andrade,11610987653,daniela.andrade@email.com
+58,13,Luana,Nogueira,F,2005-04-30,3º ano EM,Turma F,2023-06-05,Rodrigo Nogueira,21609876542,rodrigo.nogueira@email.com
+59,14,Vicente,Medeiros,M,2015-12-17,2º ano,Turma G,2023-06-08,Camila Medeiros,31598765431,camila.medeiros@email.com
+60,15,Laís,Siqueira,F,2016-09-04,1º ano,Turma H,2023-06-10,Thiago Siqueira,41587654320,thiago.siqueira@email.com
+61,16,Davi Lucca,Mendonça,M,2017-05-22,Pré-escola,Turma I,2023-06-12,Bianca Mendonça,51576543219,bianca.mendonca@email.com
+62,17,Marina,Tavares,F,2018-02-09,Maternal,Turma J,2023-06-15,Leonardo Tavares,61565432108,leonardo.tavares@email.com
+63,18,Enzo Gabriel,Carneiro,M,2014-10-27,3º ano,Turma K,2023-06-18,Amanda Carneiro,71554321097,amanda.carneiro@email.com
+64,19,Clara,Silveira,F,2013-06-14,4º ano,Turma L,2023-06-20,Fabio Silveira,81543210986,fabio.silveira@email.com
+65,20,Matheus,Pires,M,2012-02-01,5º ano,Turma M,2023-06-22,Juliana Pires,91532109875,juliana.pires@email.com
+66,21,Isis,Figueiredo,F,2011-08-19,6º ano,Turma N,2023-06-25,Marcos Figueiredo,11521098764,marcos.figueiredo@email.com
+67,22,Thomas,Freitas,M,2010-04-06,7º ano,Turma O,2023-06-28,Roberta Freitas,21510987653,roberta.freitas@email.com
+68,23,Clarice,Borges,F,2009-11-23,8º ano,Turma P,2023-06-30,Eduardo Borges,31509876542,eduardo.borges@email.com
+69,24,Ryan,Santana,M,2008-07-11,9º ano,Turma Q,2023-07-03,Aline Santana,41498765431,aline.santana@email.com
+70,25,Lorena,Carvalho,F,2007-03-29,1º ano EM,Turma R,2023-07-05,Victor Carvalho,51487654320,victor.carvalho@email.com
+71,26,Nathan,Melo,M,2006-10-16,2º ano EM,Turma S,2023-07-08,Tatiana Melo,61476543219,tatiana.melo@email.com
+72,27,Catarina,Araújo,F,2005-06-03,3º ano EM,Turma T,2023-07-10,Renato Araújo,71465432108,renato.araujo@email.com
+73,28,Murilo,Reis,M,2015-01-21,2º ano,Turma U,2023-07-12,Beatriz Reis,81454321097,beatriz.reis@email.com
+74,29,Vitória,Lopes,F,2016-10-08,1º ano,Turma V,2023-07-15,Cesar Lopes,91443210986,cesar.lopes@email.com
+75,30,Pedro Henrique,Sousa,M,2017-06-26,Pré-escola,Turma W,2023-07-18,Larissa Sousa,11432109875,larissa.sousa@email.com
+76,1,Olívia,Nascimento,F,2018-03-14,Maternal,Turma X,2023-07-20,Guilherme Nascimento,21421098764,guilherme.nascimento@email.com
+77,2,Anthony,Moreira,M,2014-11-01,3º ano,Turma Y,2023-07-22,Carla Moreira,31410987653,carla.moreira@email.com
+78,3,Mariah,Almeida,F,2013-07-19,4º ano,Turma Z,2023-07-25,Diego Almeida,41409876542,diego.almeida@email.com
+79,4,Leonardo,Batista,M,2012-03-07,5º ano,Turma A,2023-07-28,Vanessa Batista,51398765431,vanessa.batista@email.com
+80,5,Antonella,Barros,F,2011-09-24,6º ano,Turma B,2023-07-30,Alexandre Barros,61387654320,alexandre.barros@email.com
+81,6,Caio,Rezende,M,2010-05-12,7º ano,Turma C,2023-08-02,Cristiane Rezende,71376543219,cristiane.rezende@email.com
+82,7,Eduarda,Correia,F,2009-12-29,8º ano,Turma D,2023-08-05,Ronaldo Correia,81365432108,ronaldo.correia@email.com
+83,8,Erick,Macedo,M,2008-08-17,9º ano,Turma E,2023-08-08,Simone Macedo,91354321097,simone.macedo@email.com
+84,9,Agatha,Cardoso,F,2007-04-04,1º ano EM,Turma F,2023-08-10,Marcio Cardoso,11343210986,marcio.cardoso@email.com
+85,10,Levi,Cunha,M,2006-11-21,2º ano EM,Turma G,2023-08-12,Luciana Cunha,21332109875,luciana.cunha@email.com
+86,1,Emilly,Rocha,F,2005-07-09,3º ano EM,Turma H,2023-08-15,Fabiano Rocha,31321098764,fabiano.rocha@email.com
+87,2,Enrico,Nunes,M,2015-02-26,2º ano,Turma I,2023-08-18,Paula Nunes,41310987653,paula.nunes@email.com
+88,3,Lara,Teixeira,F,2016-11-13,1º ano,Turma J,2023-08-20,Vitor Teixeira,51309876542,vitor.teixeira@email.com
+89,4,Bento,Lima,M,2017-07-31,Pré-escola,Turma K,2023-08-22,Taís Lima,61298765431,tais.lima@email.com
+90,5,Pietra,Gonçalves,F,2018-04-18,Maternal,Turma L,2023-08-25,Osvaldo Gonçalves,71287654320,osvaldo.goncalves@email.com
+91,6,Martin,Ferreira,M,2014-12-06,3º ano,Turma M,2023-08-28,Elaine Ferreira,81276543219,elaine.ferreira@email.com
+92,7,Gabriela,Marques,F,2013-08-23,4º ano,Turma N,2023-08-30,Augusto Marques,91265432108,augusto.marques@email.com
+93,8,Raul,Duarte,M,2012-04-10,5º ano,Turma O,2023-09-02,Cláudia Duarte,11254321097,claudia.duarte@email.com
+94,9,Aurora,Oliveira,F,2011-10-28,6º ano,Turma P,2023-09-05,Rogério Oliveira,21243210986,rogerio.oliveira@email.com
+95,10,Noah,Pereira,M,2010-06-15,7º ano,Turma Q,2023-09-08,Silvia Pereira,31232109875,silvia.pereira@email.com
+96,11,Malu,Castro,F,2009-02-02,8º ano,Turma R,2023-09-10,Leandro Castro,41221098764,leandro.castro@email.com
+97,12,Felipe,Monteiro,M,2008-09-20,9º ano,Turma S,2023-09-12,Andrea Monteiro,51210987653,andrea.monteiro@email.com
+98,13,Sophie,Santos,F,2007-05-07,1º ano EM,Turma T,2023-09-15,Roberto Santos,61209876542,roberto.santos@email.com
+99,14,Theo,Silva,M,2006-12-24,2º ano EM,Turma U,2023-09-18,Priscila Silva,71198765431,priscila.silva@email.com
+100,15,Giovanna,Costa,F,2005-08-11,3º ano EM,Turma V,2023-09-20,Fábio Costa,81187654320,fabio.costa@email.com
