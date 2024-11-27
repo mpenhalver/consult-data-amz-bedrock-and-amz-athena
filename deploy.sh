@@ -6,7 +6,10 @@ aws cloudformation create-stack --stack-name poc-app-stack --template-body file:
 # Esperar o stack ser criado
 aws cloudformation wait stack-create-complete --stack-name poc-app-stack
 
+# Account ID
+ACCOUNTID=$(aws sts get-caller-identity --query Account --output text)
+
 # Fazer upload dos arquivos
-aws s3 cp data/schools.csv s3://poc-table-data/Schools/
-aws s3 cp data/students.csv s3://poc-table-data/Students/
-aws s3 cp data/table_structures.json s3://poc-config-data/
+aws s3 cp data/schools.csv s3://$ACCOUNTID-poc-table-data/Schools/
+aws s3 cp data/students.csv s3://$ACCOUNTID-poc-table-data/Students/
+aws s3 cp data/table_structures.json s3://$ACCOUNTID-poc-config-data/
