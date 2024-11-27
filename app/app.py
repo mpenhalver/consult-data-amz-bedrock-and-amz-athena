@@ -3,10 +3,15 @@ import boto3
 import time
 import gradio as gr
 
+
+sts = boto3.client('sts')
+caller_identity = sts.get_caller_identity()
+account_id = caller_identity['Account']
+
 # Funções do Lambda original
 def load_table_structures_from_s3():
     s3 = boto3.client('s3')
-    bucket_name = 'poc-config-data'
+    bucket_name = f'{account_id}-poc-config-data'
     file_key = 'table_structures.json'
     
     response = s3.get_object(Bucket=bucket_name, Key=file_key)
@@ -112,7 +117,7 @@ def process_query(prompt, history):
         query_execution = athena_client.start_query_execution(
             QueryString=sql_query,
             QueryExecutionContext={'Database': 'poc-db'},
-            ResultConfiguration={'OutputLocation': 's3://poc-config-data/athena-results/'}
+            ResultConfiguration={'OutputLocation': f's3://{account_id}-poc-config-data/athena-results/'}
         )
         
         # Aguardar a conclusão da consulta
