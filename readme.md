@@ -17,7 +17,7 @@
     ```bash
         aws ecr create-repository --repository-name poc-app
         aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
-        docker build -t poc-app .
+        docker build -t poc-app --platform linux/amd64 .
         docker tag poc-app:latest <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/poc-app:latest
         docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/poc-app:latest
     ```
