@@ -168,14 +168,14 @@ Resources:
   DataBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: poc-table-data
+      BucketName: !Sub "${AWS::AccountId}-poc-table-data"
       VersioningConfiguration:
         Status: Enabled
 
   ConfigDataBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: poc-config-data
+      BucketName: !Sub "${AWS::AccountId}-poc-config-data"
       VersioningConfiguration:
         Status: Enabled
 
@@ -385,40 +385,18 @@ Outputs:
   DataBucketName:
     Description: Nome do bucket S3 para dados CSV
     Value: !Ref DataBucket
+  DataBucketPath:
+    Description: Caminho do bucket S3 para dados CSV
+    Value: !Join [ '', [ 's3://', !Ref DataBucket ] ]
   ConfigDataBucketName:
     Description: Nome do bucket S3 para dados de configuracao
     Value: !Ref ConfigDataBucket
+  ConfigDataBucketPath:
+    Description: Caminho do bucket S3 para dados de configuração
+    Value: !Join [ '', [ 's3://', !Ref ConfigDataBucket ] ]
   GlueDatabaseName:
     Description: Nome do banco de dados Glues
     Value: !Ref GlueDatabase
   AthenaWorkgroupName:
     Description: Nome do workgroup do Athena
     Value: !Ref AthenaWorkgroup
-
-
-### 1. Salve-o como um arquivo YAML (por exemplo, `poc-app-stack.yaml`).
-
-### 2. Construa e envie sua imagem Docker para o ECR:
-
-  #  ```bash
-  #  aws ecr create-repository --repository-name poc-app
-  #  aws ecr get-login-password --region <sua-região> | docker login --username AWS --password-stdin <seu-account-id>.dkr.ecr.<sua-região>.amazonaws.com
-  #  docker build -t poc-app .
-  #  docker tag poc-app:latest <seu-account-id>.dkr.ecr.<sua-região>.amazonaws.com/poc-app:latest
-  #  docker push <seu-account-id>.dkr.ecr.<sua-região>.amazonaws.com/poc-app:latest
-  #  ```
-
-### 3. Implante o stack usando o AWS CLI:
-
-#    ```bash
-#    aws cloudformation create-stack --stack-name poc-app-stack --template-body file://poc-app-stack.yaml --capabilities CAPABILITY_IAM
-#    ```
-
-# 4. Após a implantação bem-sucedida, você pode acessar sua aplicação Poc usando o DNS do ALB fornecido na saída do stack.
-
-# 5. Subir as tabelas e o arquivo table structure no S3
-
-# 6. Criar o crawler e rodar
-
-
-
