@@ -6,6 +6,7 @@
 1. It is recommended to run this sample in a **sandbox account**. The sample has no tests and not all security best practices are implemented.
 2. Python v3.12
 3. Docker installed
+4. [Manage Amazon Bedrock model access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) based on the models you will use
 
 
 
