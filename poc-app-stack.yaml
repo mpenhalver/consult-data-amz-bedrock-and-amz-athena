@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'ECS cluster com ALB para aplicacao PoC'
+Description: 'ECS cluster com NLB para aplicacao PoC'
 
 # Input parameters for VPC CIDR blocks and ECR repository configuration
 Parameters:
@@ -234,7 +234,7 @@ Resources:
   # Create ECS service to manage task deployment
   ECSService:
     Type: AWS::ECS::Service
-    DependsOn: ALBListener
+    DependsOn: NLBListener
     Properties:
       ServiceName: PocAppService
       Cluster: !Ref ECSCluster
@@ -252,42 +252,48 @@ Resources:
       LoadBalancers:
         - ContainerName: poc-app
           ContainerPort: 7860
-          TargetGroupArn: !Ref ALBTargetGroup
-
-  # Create Application Load Balancer for traffic distribution
-  ALB:
+          TargetGroupArn: !Ref NLBTargetGroup
+  
+  # Create Network Load Balancer for traffic distribution
+  NLB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Scheme: internet-facing
       LoadBalancerAttributes:
-      - Key: idle_timeout.timeout_seconds
-        Value: '60'
+        - Key: load_balancing.cross_zone.enabled
+          Value: true
+      Scheme: internet-facing
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
-      SecurityGroups: [!Ref ALBSecurityGroup]
+      Type: network
 
-  # Configure ALB listener for HTTP traffic
-  ALBListener:
+  # Configure NLB listener for HTTPS traffic
+  NLBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
         - Type: forward
-          TargetGroupArn: !Ref ALBTargetGroup
-      LoadBalancerArn: !Ref ALB
-      Port: 80
-      Protocol: HTTP
+          TargetGroupArn: !Ref NLBTargetGroup
+      LoadBalancerArn: !Ref NLB
+      Port: 443
+      Protocol: TCP
 
-  # Create target group for ALB routing
-  ALBTargetGroup:
+  # Create target group for NLB routing
+  NLBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckPath: /
       Name: PocAppTargetGroup
       Port: 7860
-      Protocol: HTTP
+      Protocol: TCP
       TargetType: ip
       VpcId: !Ref VPC
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30
+      HealthCheckProtocol: TCP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      UnhealthyThresholdCount: 3
+
 
   # Create IAM role for ECS task execution
   ECSTaskExecutionRole:
@@ -348,23 +354,11 @@ Resources:
         - IpProtocol: tcp
           FromPort: 7860
           ToPort: 7860
-          SourceSecurityGroupId: !Ref ALBSecurityGroup
+          CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: -1
           FromPort: -1
           ToPort: -1
-          CidrIp: 0.0.0.0/0
-
-  # Define security group for ALB
-  ALBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security group for Poc App ALB
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
           CidrIp: 0.0.0.0/0
 
   # Create CloudWatch log group for container logs
@@ -376,24 +370,21 @@ Resources:
 
 # Define stack outputs
 Outputs:
-  ALBDNSName:
-    Description: DNS name of the Application Load Balancer
-    Value: !GetAtt ALB.DNSName
+  NLBDNSName:
+    Description: DNS name of the Network Load Balancer with port
+    Value: !Join 
+      - ':'
+      - - !GetAtt NLB.DNSName
+        - '443'
   ECRRepositoryUri:
     Description: URI of the ECR Repository
     Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepositoryName}
   DataBucketName:
     Description: Nome do bucket S3 para dados CSV
     Value: !Ref DataBucket
-  DataBucketPath:
-    Description: Caminho do bucket S3 para dados CSV
-    Value: !Join [ '', [ 's3://', !Ref DataBucket ] ]
   ConfigDataBucketName:
     Description: Nome do bucket S3 para dados de configuracao
     Value: !Ref ConfigDataBucket
-  ConfigDataBucketPath:
-    Description: Caminho do bucket S3 para dados de configuração
-    Value: !Join [ '', [ 's3://', !Ref ConfigDataBucket ] ]
   GlueDatabaseName:
     Description: Nome do banco de dados Glues
     Value: !Ref GlueDatabase
