@@ -144,7 +144,7 @@ iface = gr.Blocks()
 
 with iface:
     # Adicione a imagem no topo
-    gr.Image("download.png", show_label=False, container=False)
+    gr.Image("logo.png", show_label=False, container=False)
     
     # Adicione um espaço em branco para separação (opcional)
     gr.Markdown("---")  # Isso cria uma linha horizontal para separação
