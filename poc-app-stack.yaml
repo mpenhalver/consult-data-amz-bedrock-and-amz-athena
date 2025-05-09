@@ -342,6 +342,8 @@ Resources:
                   - 'glue:GetDatabase'
                   - 'glue:GetDatabases'
                   - 'bedrock:InvokeModel'
+                  - 'bedrock:ListFoundationModels'
+                  - 'bedrock:GetFoundationModel'
                 Resource: '*'
 
   # Define security group for ECS tasks

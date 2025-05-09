@@ -1,6 +1,8 @@
 
 # Consult data with Amazon Bedrock and Amazon Athena
 
+Projeto criado por Maurício Hollanda.
+
 ## Pre-Requirements
 
 1. It is recommended to run this sample in a **sandbox account**. The sample has no tests and not all security best practices are implemented.
