@@ -1,6 +1,8 @@
 
 # Consult data with Amazon Bedrock and Amazon Athena
 
+Projeto criado por Maurício Hollanda.
+
 ## Pre-Requirements
 
 1. It is recommended to run this sample in a **sandbox account**. The sample has no tests and not all security best practices are implemented.
@@ -35,21 +37,4 @@
 4. **Access your App**
     
     Access your App getting ALB URL that is available in Output section from CloudFormation stack
-
-## Features
-
-### Model Selection
-The application now includes a dropdown menu that allows users to select which Amazon Bedrock model to use for:
-- Generating SQL queries from natural language questions
-- Creating natural language responses from SQL query results
-
-Available models include:
-- Claude 3.5 Sonnet (default)
-- Claude 3 Haiku
-- Claude 3 Opus
-- Claude Instant
-- Meta Llama 2 (13B and 70B variants)
-- Amazon Titan Text
-
-**Note:** Make sure you have enabled access to all the models you want to use in your Amazon Bedrock console. See [Manage Amazon Bedrock model access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) for more information.
 
