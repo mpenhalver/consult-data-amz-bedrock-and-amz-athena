@@ -8,6 +8,17 @@ sts = boto3.client('sts')
 caller_identity = sts.get_caller_identity()
 account_id = caller_identity['Account']
 
+# Lista de modelos disponíveis no Amazon Bedrock
+AVAILABLE_MODELS = [
+    "anthropic.claude-3-5-sonnet-20240620-v1:0",
+    "anthropic.claude-3-haiku-20240307-v1:0",
+    "anthropic.claude-3-opus-20240229-v1:0",
+    "anthropic.claude-instant-v1",
+    "meta.llama2-13b-chat-v1",
+    "meta.llama2-70b-chat-v1",
+    "amazon.titan-text-express-v1"
+]
+
 # Funções do Lambda original
 def load_table_structures_from_s3():
     s3 = boto3.client('s3')
@@ -18,38 +29,104 @@ def load_table_structures_from_s3():
     file_content = response['Body'].read().decode('utf-8')
     return json.loads(file_content)
 
-def generate_sql_with_bedrock(prompt, table_structures):
+def generate_sql_with_bedrock(prompt, table_structures, model_id):
     bedrock_runtime = boto3.client('bedrock-runtime')
     system_prompt = "Você é um assistente de IA que gera consultas SQL com base em questões de linguagem natural e estruturas de tabela fornecidas. Retorne apenas a consulta SQL sem qualquer explicação adicional."
 
-    messages = [
-        {"role": "user", "content": f"""
-         Dadas as seguintes estruturas de tabela:
-         {json.dumps(table_structures, indent=2)}
-         
-        Gere uma query SQL para responder à seguinte pergunta:
-         {prompt}
-         
-        Retorne apenas a query SQL, sem qualquer explicação adicional.
-         """}
-    ]
-    
-    body = json.dumps({
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 300,
-        "system": system_prompt,
-        "messages": messages
-    })
+    # Verificar se é um modelo da Anthropic
+    if "anthropic" in model_id.lower():
+        messages = [
+            {"role": "user", "content": f"""
+             Dadas as seguintes estruturas de tabela:
+             {json.dumps(table_structures, indent=2)}
+             
+            Gere uma query SQL para responder à seguinte pergunta:
+             {prompt}
+             
+            Retorne apenas a query SQL, sem qualquer explicação adicional.
+             """}
+        ]
+        
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 300,
+            "system": system_prompt,
+            "messages": messages
+        })
+    # Para modelos Meta Llama
+    elif "meta.llama" in model_id.lower():
+        body = json.dumps({
+            "prompt": f"""<s>[INST] {system_prompt}
+
+            Dadas as seguintes estruturas de tabela:
+            {json.dumps(table_structures, indent=2)}
+            
+            Gere uma query SQL para responder à seguinte pergunta:
+            {prompt}
+            
+            Retorne apenas a query SQL, sem qualquer explicação adicional. [/INST]</s>""",
+            "max_gen_len": 300,
+            "temperature": 0.1,
+            "top_p": 0.9
+        })
+    # Para modelos Amazon Titan
+    elif "amazon.titan" in model_id.lower():
+        body = json.dumps({
+            "inputText": f"""Você é um assistente de IA que gera consultas SQL com base em questões de linguagem natural e estruturas de tabela fornecidas. Retorne apenas a consulta SQL sem qualquer explicação adicional.
+
+            Dadas as seguintes estruturas de tabela:
+            {json.dumps(table_structures, indent=2)}
+            
+            Gere uma query SQL para responder à seguinte pergunta:
+            {prompt}
+            
+            Retorne apenas a query SQL, sem qualquer explicação adicional.""",
+            "textGenerationConfig": {
+                "maxTokenCount": 300,
+                "temperature": 0.1,
+                "topP": 0.9
+            }
+        })
+    else:
+        # Fallback para o formato Claude
+        messages = [
+            {"role": "user", "content": f"""
+             Dadas as seguintes estruturas de tabela:
+             {json.dumps(table_structures, indent=2)}
+             
+            Gere uma query SQL para responder à seguinte pergunta:
+             {prompt}
+             
+            Retorne apenas a query SQL, sem qualquer explicação adicional.
+             """}
+        ]
+        
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 300,
+            "system": system_prompt,
+            "messages": messages
+        })
     
     response = bedrock_runtime.invoke_model(
         body=body,
-        modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
+        modelId=model_id,
         contentType='application/json',
         accept='application/json'
     )
     
     response_body = json.loads(response['body'].read())
-    return response_body['content'][0]['text'].strip()
+    
+    # Extrair o texto da resposta com base no modelo
+    if "anthropic" in model_id.lower():
+        return response_body['content'][0]['text'].strip()
+    elif "meta.llama" in model_id.lower():
+        return response_body['generation'].strip()
+    elif "amazon.titan" in model_id.lower():
+        return response_body['results'][0]['outputText'].strip()
+    else:
+        # Fallback para o formato Claude
+        return response_body['content'][0]['text'].strip()
 
 def process_results(results):
     headers = [col['Label'] for col in results['ResultSet']['ResultSetMetadata']['ColumnInfo']]
@@ -62,41 +139,120 @@ def process_results(results):
         formatted_data.append(formatted_row)
     return {'headers': headers, 'data': formatted_data}
 
-def generate_nlp_response(prompt, formatted_results, sql_query):
+def generate_nlp_response(prompt, formatted_results, sql_query, model_id):
     bedrock_runtime = boto3.client('bedrock-runtime')
     
-    messages = [
-        {"role": "user", "content": f"""
-    Pergunta original: {prompt}
+    # Verificar se é um modelo da Anthropic
+    if "anthropic" in model_id.lower():
+        messages = [
+            {"role": "user", "content": f"""
+        Pergunta original: {prompt}
 
-    Consulta SQL executada: {sql_query}
+        Consulta SQL executada: {sql_query}
 
-    Resultados da consulta:
-    {json.dumps(formatted_results, indent=2)}
+        Resultados da consulta:
+        {json.dumps(formatted_results, indent=2)}
 
-    Com base nos resultados acima, forneça uma resposta em linguagem natural para a pergunta original.
-    A resposta deve ser clara, concisa e diretamente relacionada à pergunta feita.
-    Inclua números específicos e detalhes relevantes dos resultados.
-    """}
-    ]
+        Com base nos resultados acima, forneça uma resposta em linguagem natural para a pergunta original.
+        A resposta deve ser clara, concisa e diretamente relacionada à pergunta feita.
+        Inclua números específicos e detalhes relevantes dos resultados.
+        """}
+        ]
 
-    body = json.dumps({
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 1000,
-        "system": "Você é um assistente de IA que fornece respostas claras e concisas com base nos resultados da consulta SQL. Inclua números específicos e detalhes relevantes dos resultados em sua resposta.",    
-        "messages": messages,
-        "temperature": 0.7,
-        "top_p": 0.95,
-    })
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1000,
+            "system": "Você é um assistente de IA que fornece respostas claras e concisas com base nos resultados da consulta SQL. Inclua números específicos e detalhes relevantes dos resultados em sua resposta.",    
+            "messages": messages,
+            "temperature": 0.7,
+            "top_p": 0.95,
+        })
+    # Para modelos Meta Llama
+    elif "meta.llama" in model_id.lower():
+        body = json.dumps({
+            "prompt": f"""<s>[INST] Você é um assistente de IA que fornece respostas claras e concisas com base nos resultados da consulta SQL. Inclua números específicos e detalhes relevantes dos resultados em sua resposta.
+
+            Pergunta original: {prompt}
+
+            Consulta SQL executada: {sql_query}
+
+            Resultados da consulta:
+            {json.dumps(formatted_results, indent=2)}
+
+            Com base nos resultados acima, forneça uma resposta em linguagem natural para a pergunta original.
+            A resposta deve ser clara, concisa e diretamente relacionada à pergunta feita.
+            Inclua números específicos e detalhes relevantes dos resultados. [/INST]</s>""",
+            "max_gen_len": 1000,
+            "temperature": 0.7,
+            "top_p": 0.95
+        })
+    # Para modelos Amazon Titan
+    elif "amazon.titan" in model_id.lower():
+        body = json.dumps({
+            "inputText": f"""Você é um assistente de IA que fornece respostas claras e concisas com base nos resultados da consulta SQL. Inclua números específicos e detalhes relevantes dos resultados em sua resposta.
+
+            Pergunta original: {prompt}
+
+            Consulta SQL executada: {sql_query}
+
+            Resultados da consulta:
+            {json.dumps(formatted_results, indent=2)}
+
+            Com base nos resultados acima, forneça uma resposta em linguagem natural para a pergunta original.
+            A resposta deve ser clara, concisa e diretamente relacionada à pergunta feita.
+            Inclua números específicos e detalhes relevantes dos resultados.""",
+            "textGenerationConfig": {
+                "maxTokenCount": 1000,
+                "temperature": 0.7,
+                "topP": 0.95
+            }
+        })
+    else:
+        # Fallback para o formato Claude
+        messages = [
+            {"role": "user", "content": f"""
+        Pergunta original: {prompt}
+
+        Consulta SQL executada: {sql_query}
+
+        Resultados da consulta:
+        {json.dumps(formatted_results, indent=2)}
+
+        Com base nos resultados acima, forneça uma resposta em linguagem natural para a pergunta original.
+        A resposta deve ser clara, concisa e diretamente relacionada à pergunta feita.
+        Inclua números específicos e detalhes relevantes dos resultados.
+        """}
+        ]
+
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1000,
+            "system": "Você é um assistente de IA que fornece respostas claras e concisas com base nos resultados da consulta SQL. Inclua números específicos e detalhes relevantes dos resultados em sua resposta.",    
+            "messages": messages,
+            "temperature": 0.7,
+            "top_p": 0.95,
+        })
     
     response = bedrock_runtime.invoke_model(
         body=body,
-        modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
+        modelId=model_id,
         contentType='application/json',
         accept='application/json'
     )
+    
     response_body = json.loads(response['body'].read())
-    nlp_response = response_body['content'][0]['text'].strip()
+    
+    # Extrair o texto da resposta com base no modelo
+    if "anthropic" in model_id.lower():
+        nlp_response = response_body['content'][0]['text'].strip()
+    elif "meta.llama" in model_id.lower():
+        nlp_response = response_body['generation'].strip()
+    elif "amazon.titan" in model_id.lower():
+        nlp_response = response_body['results'][0]['outputText'].strip()
+    else:
+        # Fallback para o formato Claude
+        nlp_response = response_body['content'][0]['text'].strip()
+    
     return {
         'nlp_response': nlp_response,
         'sql_query': sql_query,
@@ -104,13 +260,13 @@ def generate_nlp_response(prompt, formatted_results, sql_query):
     }
 
 # Função para processar a consulta
-def process_query(prompt, history):
+def process_query(prompt, history, model_id):
     try:
         # Carregar a estrutura das tabelas do S3
         table_structures = load_table_structures_from_s3()
         
         # Gerar consulta SQL
-        sql_query = generate_sql_with_bedrock(prompt, table_structures)
+        sql_query = generate_sql_with_bedrock(prompt, table_structures, model_id)
         
         # Executar consulta no Athena
         athena_client = boto3.client('athena')
@@ -131,7 +287,7 @@ def process_query(prompt, history):
         if status == 'SUCCEEDED':
             results = athena_client.get_query_results(QueryExecutionId=query_execution['QueryExecutionId'])
             formatted_results = process_results(results)
-            nlp_response = generate_nlp_response(prompt, formatted_results, sql_query)
+            nlp_response = generate_nlp_response(prompt, formatted_results, sql_query, model_id)
             return nlp_response['nlp_response']
         else:
             return f"Erro: A consulta falhou com o status: {status}"
@@ -148,22 +304,30 @@ with iface:
     
     # Adicione um espaço em branco para separação (opcional)
     gr.Markdown("---")  # Isso cria uma linha horizontal para separação
+    
+    # Adicione o seletor de modelo
+    model_dropdown = gr.Dropdown(
+        choices=AVAILABLE_MODELS,
+        value=AVAILABLE_MODELS[0],  # Valor padrão é o primeiro modelo
+        label="Selecione o modelo do Amazon Bedrock",
+        info="Escolha qual modelo do Amazon Bedrock será utilizado para gerar consultas SQL e respostas"
+    )
 
     chatbot = gr.Chatbot(height=500)
-    msg = gr.Textbox()
+    msg = gr.Textbox(label="Digite sua pergunta")
     clear = gr.Button("Limpar")
 
     def user(user_message, history):
         return "", history + [[user_message, None]]
 
-    def bot(history):
+    def bot(history, model_id):
         user_message = history[-1][0]
-        bot_response = process_query(user_message, history)
+        bot_response = process_query(user_message, history, model_id)
         history[-1][1] = bot_response
         return history
 
     msg.submit(user, [msg, chatbot], [msg, chatbot], queue=False).then(
-        bot, chatbot, chatbot
+        bot, [chatbot, model_dropdown], chatbot
     )
     clear.click(lambda: None, None, chatbot, queue=False)
 
